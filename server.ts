@@ -222,47 +222,49 @@ app.post("/complete-quest", async (req: Request, res: Response) => {
     });
     if (user && quest) {
       const receipt = await completeQuestReceipt(questId, user.address);
+      // console.log(receipt)
       const { groupId, userAddr, engageScore } = await parseReceipt(
         receipt.transactionHash,
         "QuestComplete",
         contracts.core
       );
-      await updateEngageScoresAndCommunity(db, groupId, userAddr, engageScore);
-      await updateUserQuests(db, questId, userAddr,"ACCEPTED",null)
+      await updateEngageScoresAndCommunity(db, groupId.toString(), userAddr, engageScore);
+      await updateUserQuests(db, questId, userAddr,"ACCEPTED",null);
+      res.status(200).send();
     } else {
       res.status(400).send();
     }
   } catch (e) {
+    console.log(e)
     res.status(500).send();
   }
 });
 
 app.post("/submit-quest", async (req: Request, res: Response) => {
-  // const { questId, username, userSubmission } = req.body;
-  // try {
-  //   //collection submitted forms
-  //   const db = await connectToDb();
-  //   console.log("done until here")
-
-  //   const quest = await db
-  //     .collection("quests")
-  //     .findOne({ id: questId.toString() });
-  //   const user = await db.collection("users").findOne({ username });
-  //   if (quest && user) {
-  //     await updateUserQuests(db, questId, user.address, "PENDING", userSubmission)
-  //     res.status(200).send({
-  //       msg: "updated quest submission",
-  //     });
-  //   } else {
-  //     res.status(400).send({
-  //       msg: "User or Quest id not found",
-  //     });
-  //   }
-  // } catch (e) {
-  //   res.status(500).send({
-  //     msg: e,
-  //   });
-  // }
+  const { questId, username, userSubmission } = req.body;
+  try {
+    //collection submitted forms
+    const db = await connectToDb();
+    const quest = await db
+      .collection("quests")
+      .findOne({ id: questId});
+    const user = await db.collection("users").findOne({ username });
+    if (quest && user) {
+      await updateUserQuests(db, questId, user.address, "PENDING", userSubmission)
+      res.status(200).send({
+        msg: "updated quest submission",
+      });
+    } else {
+      res.status(400).send({
+        msg: "User or Quest id not found",
+      });
+    }
+  } catch (e) {
+    console.log(e)
+    res.status(500).send({
+      msg: e,
+    });
+  }
 });
 
 app.post("/create-quest", async (req: Request, res: Response) => {

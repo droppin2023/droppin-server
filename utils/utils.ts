@@ -46,11 +46,11 @@ const completeQuestReceipt = async (questId: any, address: any) => {
     "completeQuest",
     [questId, address]
   );
-  const tx = await signer.sendTransaction({
-    to: DIAMOND_ADDRESS,
-    data: txData,
-  });
-  return await tx.wait();
+  const contract = new Contract(DIAMOND_ADDRESS,CORE_FACET_ABI,signer);
+  const tx = await contract.completeQuest(questId, address);
+  const receipt = await tx.wait();
+  // console.log(receipt);
+  return receipt;
 };
 const updateEngageScoresAndCommunity = async (
   db: any,
@@ -58,9 +58,8 @@ const updateEngageScoresAndCommunity = async (
   userAddr: any,
   engageScore: any
 ) => {
-  let engageScoresAndCommunity =
-    (await db.collection("users").findOne({ userAddr: userAddr.toLowerCase() }))
-      .engageScoresAndCommunity || [];
+  let user = await db.collection("users").findOne({ address: userAddr.toLowerCase() });
+  let engageScoresAndCommunity = user.engageScoresAndCommunity || [];
   let exist = false;
   engageScoresAndCommunity = engageScoresAndCommunity.map((item: any) => {
     if (item.community.id == groupId) {
@@ -68,17 +67,17 @@ const updateEngageScoresAndCommunity = async (
       return {
         ...item,
         engageScore: {
-          number: item.engageScore.number.add(engageScore),
+          number: (ethers.BigNumber.from(item.engageScore.number).add(engageScore)).toString(),
           unit: "number",
         },
       };
     }
   });
   if (!exist) {
-    const group = await db.collections("groups").findOne({ id: groupId });
+    const group = await db.collection("groups").findOne({ id: groupId });
     engageScoresAndCommunity.push({
       engageScore: {
-        number: engageScore,
+        number: engageScore.toString(),
         unit: "number",
       },
       community: {
@@ -89,9 +88,9 @@ const updateEngageScoresAndCommunity = async (
     });
   }
   await db
-    .collections("users")
+    .collection("users")
     .findOneAndUpdate(
-      { userAddr: userAddr.toLowerCase() },
+      { address: userAddr.toLowerCase() },
       { $set: { engageScoresAndCommunity } },
       { new: true }
     );
@@ -104,7 +103,7 @@ const updateUserQuests = async (
   userSubmission: any
 ) => {
   const user = await db
-    .collections("users")
+    .collection("users")
     .findOne({ address: userAddr.toLowerCase() });
   const quest = await db.collection("quests").findOne({ id: questId });
   let quests = user.quests || [];
@@ -144,7 +143,7 @@ const updateUserQuests = async (
 };
 const updateUserBadges = async (db: any, userAddr: any, badgeId: any) => {
   const user = await db
-    .collections("users")
+    .collection("users")
     .findOne({ address: userAddr.toLowerCase() });
   const badge = await db.collection("badges").findOne({ id: badgeId });
   let badges = user.badges || [];
