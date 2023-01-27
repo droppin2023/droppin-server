@@ -14,6 +14,8 @@ import {
   completeQuestReceipt,
   updateEngageScoresAndCommunity,
   updateUserQuests,
+  updateUserBadges,
+  updateGroupEngageScore,
 } from "./utils/utils";
 import { ethers, providers, Wallet } from "ethers";
 // import { compileSolidityCode, findTopMatches ,buildTxPayload, getDiamondFacetsAndFunctions, getDiamondLogs, generateSelectorsData} from "./utils/utils";
@@ -191,7 +193,7 @@ app.get("/check-admin", async (req: Request, res: Response) => {
       username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
     });
     const community = await db
-      .collections("groups")
+      .collection("groups")
       .findOne({ id: communityId.toString() });
     if (community.creator == user.address) {
       res.status(200).send({
@@ -203,6 +205,7 @@ app.get("/check-admin", async (req: Request, res: Response) => {
       });
     }
   } catch (e) {
+    console.log(e)
     res.status(500).send({
       isAdmin: false,
       msg: e,
@@ -214,9 +217,7 @@ app.post("/complete-quest", async (req: Request, res: Response) => {
   const { questId, username } = req.body;
   try {
     const db = await connectToDb();
-    const quest = await db
-      .collection("quests")
-      .findOne({ id: questId});
+    const quest = await db.collection("quests").findOne({ id: questId });
     const user = await db.collection("users").findOne({
       username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
     });
@@ -228,14 +229,20 @@ app.post("/complete-quest", async (req: Request, res: Response) => {
         "QuestComplete",
         contracts.core
       );
-      await updateEngageScoresAndCommunity(db, groupId.toString(), userAddr, engageScore);
-      await updateUserQuests(db, questId, userAddr,"ACCEPTED",null);
+      await updateEngageScoresAndCommunity(
+        db,
+        groupId.toString(),
+        userAddr,
+        engageScore
+      );
+      await updateGroupEngageScore(db, groupId.toString(), engageScore);
+      await updateUserQuests(db, questId, userAddr, "ACCEPTED", null);
       res.status(200).send();
     } else {
       res.status(400).send();
     }
   } catch (e) {
-    console.log(e)
+    console.log(e);
     res.status(500).send();
   }
 });
@@ -245,12 +252,16 @@ app.post("/submit-quest", async (req: Request, res: Response) => {
   try {
     //collection submitted forms
     const db = await connectToDb();
-    const quest = await db
-      .collection("quests")
-      .findOne({ id: questId});
+    const quest = await db.collection("quests").findOne({ id: questId });
     const user = await db.collection("users").findOne({ username });
     if (quest && user) {
-      await updateUserQuests(db, questId, user.address, "PENDING", userSubmission)
+      await updateUserQuests(
+        db,
+        questId,
+        user.address,
+        "PENDING",
+        userSubmission
+      );
       res.status(200).send({
         msg: "updated quest submission",
       });
@@ -260,7 +271,7 @@ app.post("/submit-quest", async (req: Request, res: Response) => {
       });
     }
   } catch (e) {
-    console.log(e)
+    console.log(e);
     res.status(500).send({
       msg: e,
     });
@@ -340,6 +351,65 @@ app.post("/create-badge", async (req: Request, res: Response) => {
   } catch (e) {
     console.log(e);
     res.status(500).end();
+  }
+});
+
+app.post("/complete-badge", async (req: Request, res: Response) => {
+  const { transactionHash } = req.body;
+
+  try {
+    const db = await connectToDb();
+    const { badgeData, userAddr, id } = await parseReceipt(
+      transactionHash,
+      "BadgeClaimed",
+      contracts.badge
+    );
+
+    await updateUserBadges(db, userAddr, id.toString());
+    res.status(200).send({
+      msg: "sucessfully updated",
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).send();
+  }
+});
+
+app.get("/user", async (req: Request, res: Response) => {
+  let { username } = req.body;
+  try {
+    const db = await connectToDb();
+    let resData = await db
+      .collection("users")
+      .findOne({
+        username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
+      });
+    let communityBadges:any = {};
+    let communitiesWithBadge = [];
+    resData.badges.forEach((item: any) => {
+      communityBadges[item.groupId] ? communityBadges[item.groupId].push(item) : communityBadges[item.groupId] = [item];
+    });
+
+    for (const [key, value] of Object.entries(communityBadges)) {
+      const group = await db.collection("groups").findOne({id : key});
+      communitiesWithBadge.push({
+        community : {
+          id: key,
+          address: 'none',
+          image: group.logo,
+          name: group.name
+        },
+        badges : value
+      })
+    }
+    resData['communitiesWithBadge'] = communitiesWithBadge;
+    
+    res.status(200).send({
+      data : resData
+    })
+  } catch (e) {
+    console.log(e);
+    res.status(500).send();
   }
 });
 

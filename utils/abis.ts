@@ -329,6 +329,63 @@ export const CORE_FACET_ABI = [
         },
         {
           "indexed": false,
+          "internalType": "address",
+          "name": "userAddr",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "BadgeClaimed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256[3]",
+              "name": "requiredQuests",
+              "type": "uint256[3]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "engagePointsThreshold",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "badgePrice",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "NFT",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "groupId",
+              "type": "uint256"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct LibBadgeFacet.BadgeData",
+          "name": "badgeData",
+          "type": "tuple"
+        },
+        {
+          "indexed": false,
           "internalType": "string",
           "name": "nftSymbol",
           "type": "string"

@@ -46,7 +46,7 @@ const completeQuestReceipt = async (questId: any, address: any) => {
     "completeQuest",
     [questId, address]
   );
-  const contract = new Contract(DIAMOND_ADDRESS,CORE_FACET_ABI,signer);
+  const contract = new Contract(DIAMOND_ADDRESS, CORE_FACET_ABI, signer);
   const tx = await contract.completeQuest(questId, address);
   const receipt = await tx.wait();
   // console.log(receipt);
@@ -58,7 +58,9 @@ const updateEngageScoresAndCommunity = async (
   userAddr: any,
   engageScore: any
 ) => {
-  let user = await db.collection("users").findOne({ address: userAddr.toLowerCase() });
+  let user = await db
+    .collection("users")
+    .findOne({ address: userAddr.toLowerCase() });
   let engageScoresAndCommunity = user.engageScoresAndCommunity || [];
   let exist = false;
   engageScoresAndCommunity = engageScoresAndCommunity.map((item: any) => {
@@ -67,7 +69,9 @@ const updateEngageScoresAndCommunity = async (
       return {
         ...item,
         engageScore: {
-          number: (ethers.BigNumber.from(item.engageScore.number).add(engageScore)).toString(),
+          number: ethers.BigNumber.from(item.engageScore.number)
+            .add(engageScore)
+            .toString(),
           unit: "number",
         },
       };
@@ -106,7 +110,7 @@ const updateUserQuests = async (
     .collection("users")
     .findOne({ address: userAddr.toLowerCase() });
   const quest = await db.collection("quests").findOne({ id: questId });
-  let quests = user.quests || [];
+  let quests = user.userQuests || [];
   let exists = false;
   let raiseError = false;
   quests = quests.map((item: any) => {
@@ -137,7 +141,7 @@ const updateUserQuests = async (
     .collection("users")
     .findOneAndUpdate(
       { address: userAddr.toLowerCase() },
-      { $set: { quests } },
+      { $set: { userQuests :quests } },
       { new: true }
     );
 };
@@ -148,15 +152,30 @@ const updateUserBadges = async (db: any, userAddr: any, badgeId: any) => {
   const badge = await db.collection("badges").findOne({ id: badgeId });
   let badges = user.badges || [];
   badges.push({
-    ...badge
-  })
+    ...badge,
+  });
   await db
-    .collections("users")
+    .collection("users")
     .findOneAndUpdate(
-      { userAddr: userAddr.toLowerCase() },
+      { address: userAddr.toLowerCase() },
       { $set: { badges } },
       { new: true }
     );
+};
+
+const updateGroupEngageScore = async (
+  db: any,
+  groupId: any,
+  engageScore: any
+) => {
+  const group = await db.collection("groups").findOne({ id: groupId });
+  let ParsedTotalEngage = group.totalEngage
+    ? ethers.BigNumber.from(group.totalEngage)
+    : ethers.BigNumber.from(0);
+  let totalEngage = ParsedTotalEngage.add(engageScore).toString();
+  await db
+    .collection("groups")
+    .findOneAndUpdate({ id: groupId }, { $set: { totalEngage } });
 };
 export {
   getTimestamp,
@@ -167,4 +186,6 @@ export {
   completeQuestReceipt,
   updateEngageScoresAndCommunity,
   updateUserQuests,
+  updateUserBadges,
+  updateGroupEngageScore
 };
