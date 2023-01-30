@@ -86,7 +86,7 @@ app.post("/create-group", async (req: Request, res: Response) => {
         discord: parsedDiscord,
         id: id.toString(),
         creator: creator.toLowerCase(),
-        memberCount: 1,
+        totalMember: 0,
       });
       res.status(200).send({
         id: id.toString(),
@@ -148,6 +148,10 @@ app.post("/sign-up", async (req: Request, res: Response) => {
         discord,
         username: username.toLowerCase(),
         image,
+        badges: [],
+        communitiesWithBadge: [],
+        userQuests: [],
+        engageScoresAndCommunity: [],
       });
       res.status(200).send({
         username,
@@ -160,8 +164,8 @@ app.post("/sign-up", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/check-login", async (req: Request, res: Response) => {
-  const { address } = req.body;
+app.get("/check-login/:address", async (req: Request, res: Response) => {
+  const { address } = req.params;
   try {
     const db = await connectToDb();
     const user = await db.collection("users").findOne({
@@ -186,8 +190,8 @@ app.get("/check-login", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/check-admin", async (req: Request, res: Response) => {
-  const { communityId, username } = req.body;
+app.get("/check-admin/:communityId/:username", async (req: Request, res: Response) => {
+  const { communityId, username } = req.params;
   try {
     const db = await connectToDb();
     const user = await db.collection("users").findOne({
@@ -378,8 +382,8 @@ app.post("/complete-badge", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/user", async (req: Request, res: Response) => {
-  let { username } = req.body;
+app.get("/user/:username", async (req: Request, res: Response) => {
+  let { username } = req.params;
   try {
     const db = await connectToDb();
     let resData = await db.collection("users").findOne({
@@ -387,14 +391,13 @@ app.get("/user", async (req: Request, res: Response) => {
     });
     let communityBadges: any = {};
     let communitiesWithBadge = [];
-    if(resData.badges){
+    if (resData.badges) {
       resData.badges.forEach((item: any) => {
         communityBadges[item.groupId]
           ? communityBadges[item.groupId].push(item)
           : (communityBadges[item.groupId] = [item]);
       });
     }
-
 
     for (const [key, value] of Object.entries(communityBadges)) {
       const group = await db.collection("groups").findOne({ id: key });
@@ -415,12 +418,13 @@ app.get("/user", async (req: Request, res: Response) => {
     });
   } catch (e) {
     console.log(e);
-    res.status(500).send();
+    res.status(500).send({
+    });
   }
 });
 
-app.get("/community", async (req: Request, res: Response) => {
-  const { communityId } = req.body;
+app.get("/community/:communityId", async (req: Request, res: Response) => {
+  const { communityId } = req.params;
   try {
     const db = await connectToDb();
     let resData = await db
@@ -439,12 +443,13 @@ app.get("/community", async (req: Request, res: Response) => {
     const defaultBadge = resData.defaultBadge;
     let members = [];
     if (defaultBadge) {
-      members = await db.collection("users").find({});
+      members = await db.collection("users").find({}).toArray();
+      console.log(members);
       members = members.filter((item: any) => {
         return (
-          item.badges.filter((i: any) => {
-            i.id == defaultBadge.id;
-          }).length > 1
+          item.badges.find((i: any) => {
+            return i.id == defaultBadge.id;
+          })
         );
       });
     }

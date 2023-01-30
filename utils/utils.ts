@@ -194,7 +194,7 @@ const updateGroupBadges = async (db: any, groupId: any, badgeId: any) => {
   let badges = group.badges || [];
   badges.push(badge);
 
-  if (badges.length() == 1) {
+  if (badges.length == 1) {
     await db
       .collection("groups")
       .findOneAndUpdate(
