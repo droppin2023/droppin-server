@@ -16,6 +16,8 @@ import {
   updateUserQuests,
   updateUserBadges,
   updateGroupEngageScore,
+  updateGroupQuests,
+  updateGroupBadges,
 } from "./utils/utils";
 import { ethers, providers, Wallet } from "ethers";
 // import { compileSolidityCode, findTopMatches ,buildTxPayload, getDiamondFacetsAndFunctions, getDiamondLogs, generateSelectorsData} from "./utils/utils";
@@ -204,7 +206,7 @@ app.get("/check-admin", async (req: Request, res: Response) => {
       });
     }
   } catch (e) {
-    console.log(e)
+    console.log(e);
     res.status(500).send({
       isAdmin: false,
       msg: e,
@@ -295,7 +297,7 @@ app.post("/create-quest", async (req: Request, res: Response) => {
         msg: "FAIL : duplicated quest",
       });
     } else {
-      db.collection("quests").insertOne({
+      await db.collection("quests").insertOne({
         id: id.toString(),
         condition: parsedCondition,
         engagePoints,
@@ -303,6 +305,7 @@ app.post("/create-quest", async (req: Request, res: Response) => {
         name,
         detail,
       });
+      await updateGroupQuests(db, groupId.toString(), id.toString());
       res.status(200).send({
         msg: "success",
       });
@@ -332,7 +335,7 @@ app.post("/create-badge", async (req: Request, res: Response) => {
         msg: "FAIL : duplicated badge",
       });
     } else {
-      db.collection("badges").insertOne({
+      await db.collection("badges").insertOne({
         id: id.toString(),
         address: NFT,
         description,
@@ -342,6 +345,7 @@ app.post("/create-badge", async (req: Request, res: Response) => {
         name,
         groupId: groupId.toString(),
       });
+      await updateGroupBadges(db, groupId.toString(), id.toString());
       res.status(200).send({
         badgeId: id.toString(),
         groupId: groupId.toString(),
@@ -378,58 +382,79 @@ app.get("/user", async (req: Request, res: Response) => {
   let { username } = req.body;
   try {
     const db = await connectToDb();
-    let resData = await db
-      .collection("users")
-      .findOne({
-        username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
-      });
-    let communityBadges:any = {};
-    let communitiesWithBadge = [];
-    resData.badges.forEach((item: any) => {
-      communityBadges[item.groupId] ? communityBadges[item.groupId].push(item) : communityBadges[item.groupId] = [item];
+    let resData = await db.collection("users").findOne({
+      username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
     });
+    let communityBadges: any = {};
+    let communitiesWithBadge = [];
+    if(resData.badges){
+      resData.badges.forEach((item: any) => {
+        communityBadges[item.groupId]
+          ? communityBadges[item.groupId].push(item)
+          : (communityBadges[item.groupId] = [item]);
+      });
+    }
+
 
     for (const [key, value] of Object.entries(communityBadges)) {
-      const group = await db.collection("groups").findOne({id : key});
+      const group = await db.collection("groups").findOne({ id: key });
       communitiesWithBadge.push({
-        community : {
+        community: {
           id: key,
-          address: 'none',
+          address: "none",
           image: group.logo,
-          name: group.name
+          name: group.name,
         },
-        badges : value
-      })
+        badges: value,
+      });
     }
-    resData['communitiesWithBadge'] = communitiesWithBadge;
-    
+    resData["communitiesWithBadge"] = communitiesWithBadge;
+
     res.status(200).send({
-      data : resData
-    })
+      data: resData,
+    });
   } catch (e) {
     console.log(e);
     res.status(500).send();
   }
 });
 
-// app.get("/community", async (req: Request, res: Response) => {
-//   const {communityId} = req.body
-//   try{
-//     const db = await connectToDb();
-//     let resData = await db.collection("groups").findOne({id : communityId.toString()});
-//     const owner = await db.collection("users").findOne({address : resData.creator});
-//     resData["owner"] = {
-//       username: owner.username,
-//       address: resData.owner,
-//       image: owner.image,
-//       name: owner.name
-//     }
+app.get("/community", async (req: Request, res: Response) => {
+  const { communityId } = req.body;
+  try {
+    const db = await connectToDb();
+    let resData = await db
+      .collection("groups")
+      .findOne({ id: communityId.toString() });
+    const owner = await db
+      .collection("users")
+      .findOne({ address: resData.creator });
+    resData["owner"] = {
+      username: owner.username,
+      address: resData.owner,
+      image: owner.image,
+      name: owner.name,
+    };
 
-//   }catch(e){
-//     console.log(e);
-//     res.status(500).end();
-//   }
-// });
+    const defaultBadge = resData.defaultBadge;
+    let members = [];
+    if (defaultBadge) {
+      members = await db.collection("users").find({});
+      members = members.filter((item: any) => {
+        return (
+          item.badges.filter((i: any) => {
+            i.id == defaultBadge.id;
+          }).length > 1
+        );
+      });
+    }
+    resData["members"] = members;
+    res.status(200).send({ data: resData });
+  } catch (e) {
+    console.log(e);
+    res.status(500).end();
+  }
+});
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${port}`);

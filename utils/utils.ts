@@ -141,7 +141,7 @@ const updateUserQuests = async (
     .collection("users")
     .findOneAndUpdate(
       { address: userAddr.toLowerCase() },
-      { $set: { userQuests :quests } },
+      { $set: { userQuests: quests } },
       { new: true }
     );
 };
@@ -177,6 +177,40 @@ const updateGroupEngageScore = async (
     .collection("groups")
     .findOneAndUpdate({ id: groupId }, { $set: { totalEngage } });
 };
+
+const updateGroupQuests = async (db: any, groupId: any, questId: any) => {
+  const group = await db.collection("groups").findOne({ id: groupId });
+  const quest = await db.collection("quests").findOne({ id: questId });
+  let quests = group.quests || [];
+  quests.push(quest);
+  await db
+    .collection("groups")
+    .findOneAndUpdate({ id: groupId }, { $set: { quests } }, { new: true });
+};
+
+const updateGroupBadges = async (db: any, groupId: any, badgeId: any) => {
+  const group = await db.collection("groups").findOne({ id: groupId });
+  const badge = await db.collection("badges").findOne({ id: badgeId });
+  let badges = group.badges || [];
+  badges.push(badge);
+
+  if (badges.length() == 1) {
+    await db
+      .collection("groups")
+      .findOneAndUpdate(
+        { id: groupId },
+        { $set: { badges, defaultBadge: badge } },
+        { new: true }
+      );
+  } else {
+    await db.collection("groups").findOneAndUpdate(
+      { id: groupId },
+      { $set: { badges} },
+      { new: true }
+    )
+  }
+};
+
 export {
   getTimestamp,
   awaitAndFilter,
@@ -187,5 +221,7 @@ export {
   updateEngageScoresAndCommunity,
   updateUserQuests,
   updateUserBadges,
-  updateGroupEngageScore
+  updateGroupEngageScore,
+  updateGroupQuests,
+  updateGroupBadges,
 };
