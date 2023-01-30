@@ -128,7 +128,6 @@ app.post("/sign-up", async (req: Request, res: Response) => {
 
   try {
     const db = await connectToDb();
-    const parsedDiscord = JSON.parse(discord);
     const user = await db.collection("users").findOne({
       username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
     });
@@ -144,7 +143,7 @@ app.post("/sign-up", async (req: Request, res: Response) => {
         name,
         address: address.toLowerCase(),
         description,
-        discord: parsedDiscord,
+        discord,
         username: username.toLowerCase(),
         image,
       });
@@ -412,6 +411,25 @@ app.get("/user", async (req: Request, res: Response) => {
     res.status(500).send();
   }
 });
+
+// app.get("/community", async (req: Request, res: Response) => {
+//   const {communityId} = req.body
+//   try{
+//     const db = await connectToDb();
+//     let resData = await db.collection("groups").findOne({id : communityId.toString()});
+//     const owner = await db.collection("users").findOne({address : resData.creator});
+//     resData["owner"] = {
+//       username: owner.username,
+//       address: resData.owner,
+//       image: owner.image,
+//       name: owner.name
+//     }
+
+//   }catch(e){
+//     console.log(e);
+//     res.status(500).end();
+//   }
+// });
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
