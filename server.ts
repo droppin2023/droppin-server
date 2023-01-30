@@ -461,6 +461,45 @@ app.get("/community/:communityId", async (req: Request, res: Response) => {
   }
 });
 
+app.get("/community/:communityId/pending/:username", async ( req: Request, res : Response)=> {
+  const {communityId, username} = req.params;
+  try{
+    const db = await connectToDb();
+    const user = await db.collection("users").findOne({
+      username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
+    });
+    let pendingQuests = user.userQuests;
+    pendingQuests = pendingQuests.filter((item: any)=>{
+      return item.groupId == communityId.toString()
+    })
+    let resData:any = [];
+    pendingQuests.forEach((e: any) => {
+        resData.push({
+          quest : {
+            id : e.id,
+            name : e.name,
+            description : e.detail,
+            engageScore : e.engagePoints
+          },
+          requestUser: {
+            username: user.username,
+            address: user.address,
+            image: user.image,
+            name: user.name,
+          },
+          requestAnswer : e.userSubmission
+        })
+    });
+    res.status(200).send(
+      {
+        pendingQuests: resData
+      }
+    )
+  }catch(e){
+    console.log(e);
+    res.status(500).end()
+  }
+})
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
 });
