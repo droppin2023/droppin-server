@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express, Request, response, Response } from "express";
 import dotenv from "dotenv";
 import morganBody from "morgan-body";
 import bodyParser from "body-parser";
@@ -20,6 +20,7 @@ import {
   updateGroupBadges,
 } from "./utils/utils";
 import { ethers, providers, Wallet } from "ethers";
+import { connect } from "http2";
 // import { compileSolidityCode, findTopMatches ,buildTxPayload, getDiamondFacetsAndFunctions, getDiamondLogs, generateSelectorsData} from "./utils/utils";
 // import { Providers } from "./utils/providers";
 const cors = require("cors");
@@ -190,33 +191,36 @@ app.get("/check-login/:address", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/check-admin/:communityId/:username", async (req: Request, res: Response) => {
-  const { communityId, username } = req.params;
-  try {
-    const db = await connectToDb();
-    const user = await db.collection("users").findOne({
-      username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
-    });
-    const community = await db
-      .collection("groups")
-      .findOne({ id: communityId.toString() });
-    if (community.creator == user.address) {
-      res.status(200).send({
-        isAdmin: true,
+app.get(
+  "/check-admin/:communityId/:username",
+  async (req: Request, res: Response) => {
+    const { communityId, username } = req.params;
+    try {
+      const db = await connectToDb();
+      const user = await db.collection("users").findOne({
+        username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
       });
-    } else {
-      res.status(400).send({
+      const community = await db
+        .collection("groups")
+        .findOne({ id: communityId.toString() });
+      if (community.creator == user.address) {
+        res.status(200).send({
+          isAdmin: true,
+        });
+      } else {
+        res.status(400).send({
+          isAdmin: false,
+        });
+      }
+    } catch (e) {
+      console.log(e);
+      res.status(500).send({
         isAdmin: false,
+        msg: e,
       });
     }
-  } catch (e) {
-    console.log(e);
-    res.status(500).send({
-      isAdmin: false,
-      msg: e,
-    });
   }
-});
+);
 
 app.post("/complete-quest", async (req: Request, res: Response) => {
   const { questId, username } = req.body;
@@ -418,8 +422,7 @@ app.get("/user/:username", async (req: Request, res: Response) => {
     });
   } catch (e) {
     console.log(e);
-    res.status(500).send({
-    });
+    res.status(500).send({});
   }
 });
 
@@ -446,11 +449,9 @@ app.get("/community/:communityId", async (req: Request, res: Response) => {
       members = await db.collection("users").find({}).toArray();
       console.log(members);
       members = members.filter((item: any) => {
-        return (
-          item.badges.find((i: any) => {
-            return i.id == defaultBadge.id;
-          })
-        );
+        return item.badges.find((i: any) => {
+          return i.id == defaultBadge.id;
+        });
       });
     }
     resData["members"] = members;
@@ -461,25 +462,27 @@ app.get("/community/:communityId", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/community/:communityId/pending/:username", async ( req: Request, res : Response)=> {
-  const {communityId, username} = req.params;
-  try{
-    const db = await connectToDb();
-    const user = await db.collection("users").findOne({
-      username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
-    });
-    let pendingQuests = user.userQuests;
-    pendingQuests = pendingQuests.filter((item: any)=>{
-      return item.groupId == communityId.toString()
-    })
-    let resData:any = [];
-    pendingQuests.forEach((e: any) => {
+app.get(
+  "/community/:communityId/pending/:username",
+  async (req: Request, res: Response) => {
+    const { communityId, username } = req.params;
+    try {
+      const db = await connectToDb();
+      const user = await db.collection("users").findOne({
+        username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
+      });
+      let pendingQuests = user.userQuests;
+      pendingQuests = pendingQuests.filter((item: any) => {
+        return item.groupId == communityId.toString();
+      });
+      let resData: any = [];
+      pendingQuests.forEach((e: any) => {
         resData.push({
-          quest : {
-            id : e.id,
-            name : e.name,
-            description : e.detail,
-            engageScore : e.engagePoints
+          quest: {
+            id: e.id,
+            name: e.name,
+            description: e.detail,
+            engageScore: e.engagePoints,
           },
           requestUser: {
             username: user.username,
@@ -487,19 +490,110 @@ app.get("/community/:communityId/pending/:username", async ( req: Request, res :
             image: user.image,
             name: user.name,
           },
-          requestAnswer : e.userSubmission
+          requestAnswer: e.userSubmission,
+        });
+      });
+      res.status(200).send({
+        pendingQuests: resData,
+      });
+    } catch (e) {
+      console.log(e);
+      res.status(500).end();
+    }
+  }
+);
+app.get(
+  "/quest/:questId/user/:username",
+  async (req: Request, res: Response) => {
+    const { questId, username } = req.params;
+    try {
+      const db = await connectToDb();
+      const user = await db.collection("users").findOne({
+        username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
+      });
+      let quest = user.userQuests.find((item: any) => {
+        return item.id == questId.toString();
+      });
+      if (quest) {
+        let group = await db
+          .collection("groups")
+          .findOne({ id: quest.groupId });
+        res.status(200).send({
+          status: quest.status,
+          community: {
+            id: quest.groupId,
+            address: group.link,
+            image: group.logo,
+            name: group.name,
+          },
+          quest : {
+            id: questId,
+            name: quest.name,
+            engageScore: quest.engagePoints,
+            description: quest.detail
+          },
+          userSubmission : quest.userSubmission
+        });
+      }else {
+        res.status(400).send({
+          msg : "NOT FOUND"
         })
-    });
-    res.status(200).send(
-      {
-        pendingQuests: resData
       }
-    )
+    } catch (e) {
+      console.log(e);
+      res.status(500).send();
+    }
+  }
+);
+
+app.get("/quest/:questId", async (req: Request, res: Response) => {
+  const {questId} = req.params;
+  try{
+    const db = await connectToDb();
+    const quest = await db.collection("quests").findOne({id: questId});
+    if(quest) {
+      res.status(200).send({
+        quest
+      })
+    }else {
+      res.status(400).send({
+        msg : "NOT FOUND"
+      })
+    }
   }catch(e){
     console.log(e);
-    res.status(500).end()
+    res.status(500).send();
   }
 })
+
+app.get("/badge/:badgeId", async (req: Request, res: Response) => {
+  const {badgeId} = req.params;
+  try{
+    const db = await connectToDb();
+    const badge = await db.collection("badges").findOne({id: badgeId});
+    if(badge) {
+      let requiredQuests: any = [];
+      for(const questId of badge.requiredQuests){
+        const quest = await db.collection("quests").findOne({id: questId});
+        if(!quest) continue;
+        requiredQuests.push(quest)
+      }
+      console.log(requiredQuests)
+      res.status(200).send({
+        ...badge,
+        requiredQuests
+      })
+    }else {
+      res.status(400).send({
+        msg : "NOT FOUND"
+      })
+    }
+  }catch(e){
+    console.log(e);
+    res.status(500).send();
+  }
+})
+
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
 });
