@@ -245,7 +245,7 @@ app.post("/complete-quest", async (req: Request, res: Response) => {
         engageScore
       );
       await updateGroupEngageScore(db, groupId.toString(), engageScore);
-      await updateUserQuests(db, questId, userAddr, "ACCEPTED", null);
+      await updateUserQuests(db, questId.toString(), userAddr, "ACCEPTED", null);
       res.status(200).send();
     } else {
       res.status(400).send();
@@ -266,7 +266,7 @@ app.post("/submit-quest", async (req: Request, res: Response) => {
     if (quest && user) {
       await updateUserQuests(
         db,
-        questId,
+        questId.toString(),
         user.address,
         "PENDING",
         userSubmission
