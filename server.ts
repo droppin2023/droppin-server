@@ -226,7 +226,7 @@ app.post("/complete-quest", async (req: Request, res: Response) => {
   const { questId, username } = req.body;
   try {
     const db = await connectToDb();
-    const quest = await db.collection("quests").findOne({ id: questId });
+    const quest = await db.collection("quests").findOne({ id: questId.toString() });
     const user = await db.collection("users").findOne({
       username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
     });
