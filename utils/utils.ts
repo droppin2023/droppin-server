@@ -199,7 +199,7 @@ const updateGroupMembers = async ( db: any, groupId: any, userAddr: any ) {
   members.push({
     username: user.username,
     address: user.address,
-    name: user.mname
+    name: user.name
   })
   await db.collection("groups").findOneAndUpdate(
     { id: groupId },
