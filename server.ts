@@ -352,6 +352,7 @@ app.post("/create-badge", async (req: Request, res: Response) => {
         engagePointsThreshold,
         badgePrice,
         name,
+        image: nftInitBaseURI,
         groupId: groupId.toString(),
       });
       await updateGroupBadges(db, groupId.toString(), id.toString());
