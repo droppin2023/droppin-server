@@ -444,6 +444,18 @@ app.get("/community/:communityId", async (req: Request, res: Response) => {
       image: owner.image,
       name: owner.name,
     };
+    const defaultBadge = resData.defaultBadge;
+    let members = [];
+    if (defaultBadge) {
+      members = await db.collection("users").find({}).toArray();
+      console.log(members);
+      members = members.filter((item: any) => {
+        return item.badges.find((i: any) => {
+          return i.id == defaultBadge.id;
+        });
+      });
+    }
+    resData["members"] = members;
     res.status(200).send({ data: resData });
   } catch (e) {
     console.log(e);
