@@ -18,6 +18,7 @@ import {
   updateGroupEngageScore,
   updateGroupQuests,
   updateGroupBadges,
+  updateGroupMembers,
 } from "./utils/utils";
 import { ethers, providers, Wallet } from "ethers";
 import { connect } from "http2";
@@ -63,12 +64,11 @@ const connectToDb = async () => {
   return db;
 };
 app.post("/create-group", async (req: Request, res: Response) => {
-  const { transactionHash, link, logo, name, description, category, discord } =
+  const { transactionHash, link, logo, name, description, category, discord, repUnit } =
     req.body;
 
   try {
     const db = await connectToDb();
-    const parsedDiscord = JSON.parse(discord);
     const { id, creator } = await parseReceipt(
       transactionHash,
       "GroupCreated",
@@ -84,10 +84,12 @@ app.post("/create-group", async (req: Request, res: Response) => {
         logo,
         description,
         category,
-        discord: parsedDiscord,
+        discord,
         id: id.toString(),
         creator: creator.toLowerCase(),
         totalMember: 0,
+        repUnit,
+        members: []
       });
       res.status(200).send({
         id: id.toString(),
@@ -298,7 +300,6 @@ app.post("/create-quest", async (req: Request, res: Response) => {
       contracts.core
     );
     const { engagePoints, groupId } = questData;
-    const parsedCondition = JSON.parse(condition);
     const quest = await db.collection("quests").findOne({ id: id.toString() });
     if (quest) {
       res.status(500).send({
@@ -307,7 +308,7 @@ app.post("/create-quest", async (req: Request, res: Response) => {
     } else {
       await db.collection("quests").insertOne({
         id: id.toString(),
-        condition: parsedCondition,
+        condition,
         engagePoints,
         groupId: groupId.toString(),
         name,
@@ -377,6 +378,7 @@ app.post("/complete-badge", async (req: Request, res: Response) => {
     );
 
     await updateUserBadges(db, userAddr, id.toString());
+    await updateGroupMembers(db, id.toString(), userAddr);
     res.status(200).send({
       msg: "sucessfully updated",
     });
@@ -442,19 +444,6 @@ app.get("/community/:communityId", async (req: Request, res: Response) => {
       image: owner.image,
       name: owner.name,
     };
-
-    const defaultBadge = resData.defaultBadge;
-    let members = [];
-    if (defaultBadge) {
-      members = await db.collection("users").find({}).toArray();
-      console.log(members);
-      members = members.filter((item: any) => {
-        return item.badges.find((i: any) => {
-          return i.id == defaultBadge.id;
-        });
-      });
-    }
-    resData["members"] = members;
     res.status(200).send({ data: resData });
   } catch (e) {
     console.log(e);

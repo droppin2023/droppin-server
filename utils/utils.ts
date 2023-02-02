@@ -72,7 +72,7 @@ const updateEngageScoresAndCommunity = async (
           number: ethers.BigNumber.from(item.engageScore.number)
             .add(engageScore)
             .toString(),
-          unit: "number",
+          unit: item.engageScore.unit,
         },
       };
     }
@@ -82,7 +82,7 @@ const updateEngageScoresAndCommunity = async (
     engageScoresAndCommunity.push({
       engageScore: {
         number: engageScore.toString(),
-        unit: "number",
+        unit: group.repUnit,
       },
       community: {
         id: group.id,
@@ -188,6 +188,26 @@ const updateGroupQuests = async (db: any, groupId: any, questId: any) => {
     .findOneAndUpdate({ id: groupId }, { $set: { quests } }, { new: true });
 };
 
+const updateGroupMembers = async ( db: any, groupId: any, userAddr: any ) {
+  const group = await db.collection("groups").findOne({ id: groupId });
+  const user = await db
+    .collection("users")
+    .findOne({ address: userAddr.toLowerCase() });
+  let totalMember = group.totalMember;
+  totalMember = totalMember + 1;
+  let members = group.members;
+  members.push({
+    username: user.username,
+    address: user.address,
+    name: user.mname
+  })
+  await db.collection("groups").findOneAndUpdate(
+    { id: groupId },
+    { $set: { totalMember , members} },
+    { new: true }
+  )
+}
+
 const updateGroupBadges = async (db: any, groupId: any, badgeId: any) => {
   const group = await db.collection("groups").findOne({ id: groupId });
   const badge = await db.collection("badges").findOne({ id: badgeId });
@@ -224,4 +244,5 @@ export {
   updateGroupEngageScore,
   updateGroupQuests,
   updateGroupBadges,
+  updateGroupMembers,
 };
