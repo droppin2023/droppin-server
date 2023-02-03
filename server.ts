@@ -64,8 +64,16 @@ const connectToDb = async () => {
   return db;
 };
 app.post("/create-group", async (req: Request, res: Response) => {
-  const { transactionHash, link, logo, name, description, category, discord, repUnit } =
-    req.body;
+  const {
+    transactionHash,
+    link,
+    logo,
+    name,
+    description,
+    category,
+    discord,
+    repUnit,
+  } = req.body;
 
   try {
     const db = await connectToDb();
@@ -89,7 +97,7 @@ app.post("/create-group", async (req: Request, res: Response) => {
         creator: creator.toLowerCase(),
         totalMember: 0,
         repUnit,
-        members: []
+        members: [],
       });
       res.status(200).send({
         id: id.toString(),
@@ -101,6 +109,61 @@ app.post("/create-group", async (req: Request, res: Response) => {
     res.status(500).end();
   }
 });
+
+app.get(
+  "/check-badge/:username/:badgeId",
+  async (req: Request, res: Response) => {
+    const { username, badgeId } = req.params;
+    try {
+      const db = await connectToDb();
+      const user = await db.collection("users").findOne({
+        username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
+      });
+      const badge = await db.collection("badges").findOne({
+        id: badgeId.toString(),
+      });
+      const reqQuests = badge.requiredQuests;
+      const fulfilledQuests = user.userQuests.map((item: any) => {
+        return item.id;
+      });
+      console.log(reqQuests,fulfilledQuests);
+      const completedBadge = user.badges.find((item: any) => {
+        return item.id == badgeId.toString();
+      });
+
+      if (completedBadge) {
+        res.status(400).send({
+          msg: "badge already claimed",
+          claimable: false,
+        });
+      } else {
+        let done = true;
+        reqQuests.forEach((e: any) => {
+          const itemToFind = fulfilledQuests.find((item: any) => {
+            return e == '0' || item == e;
+          });
+          console.log(itemToFind)
+          if (!itemToFind) done = false;
+        });
+
+        if (done) {
+          res.status(200).send({
+            msg: "user completed quests",
+            claimable: true,
+          });
+        } else {
+          res.status(500).send({
+            msg: " user hasnt completed quests",
+            claimable: false,
+          });
+        }
+      }
+    } catch (e) {
+      console.log(e);
+      res.status(500).send();
+    }
+  }
+);
 
 app.post("edit-group", async (req: Request, res: Response) => {
   const { id, link, logo, name, description, category, discord, address } =
@@ -228,7 +291,9 @@ app.post("/complete-quest", async (req: Request, res: Response) => {
   const { questId, username } = req.body;
   try {
     const db = await connectToDb();
-    const quest = await db.collection("quests").findOne({ id: questId.toString() });
+    const quest = await db
+      .collection("quests")
+      .findOne({ id: questId.toString() });
     const user = await db.collection("users").findOne({
       username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
     });
@@ -247,7 +312,13 @@ app.post("/complete-quest", async (req: Request, res: Response) => {
         engageScore
       );
       await updateGroupEngageScore(db, groupId.toString(), engageScore);
-      await updateUserQuests(db, questId.toString(), userAddr, "ACCEPTED", null);
+      await updateUserQuests(
+        db,
+        questId.toString(),
+        userAddr,
+        "ACCEPTED",
+        null
+      );
       res.status(200).send();
     } else {
       res.status(400).send();
@@ -528,18 +599,18 @@ app.get(
             image: group.logo,
             name: group.name,
           },
-          quest : {
+          quest: {
             id: questId,
             name: quest.name,
             engageScore: quest.engagePoints,
-            description: quest.detail
+            description: quest.detail,
           },
-          userSubmission : quest.userSubmission
+          userSubmission: quest.userSubmission,
         });
-      }else {
+      } else {
         res.status(400).send({
-          msg : "NOT FOUND"
-        })
+          msg: "NOT FOUND",
+        });
       }
     } catch (e) {
       console.log(e);
@@ -549,52 +620,52 @@ app.get(
 );
 
 app.get("/quest/:questId", async (req: Request, res: Response) => {
-  const {questId} = req.params;
-  try{
+  const { questId } = req.params;
+  try {
     const db = await connectToDb();
-    const quest = await db.collection("quests").findOne({id: questId});
-    if(quest) {
+    const quest = await db.collection("quests").findOne({ id: questId });
+    if (quest) {
       res.status(200).send({
-        quest
-      })
-    }else {
+        quest,
+      });
+    } else {
       res.status(400).send({
-        msg : "NOT FOUND"
-      })
+        msg: "NOT FOUND",
+      });
     }
-  }catch(e){
+  } catch (e) {
     console.log(e);
     res.status(500).send();
   }
-})
+});
 
 app.get("/badge/:badgeId", async (req: Request, res: Response) => {
-  const {badgeId} = req.params;
-  try{
+  const { badgeId } = req.params;
+  try {
     const db = await connectToDb();
-    const badge = await db.collection("badges").findOne({id: badgeId});
-    if(badge) {
+    const badge = await db.collection("badges").findOne({ id: badgeId });
+    if (badge) {
       let requiredQuests: any = [];
-      for(const questId of badge.requiredQuests){
-        const quest = await db.collection("quests").findOne({id: questId});
-        if(!quest) continue;
-        requiredQuests.push(quest)
+      for (const questId of badge.requiredQuests) {
+        const quest = await db.collection("quests").findOne({ id: questId });
+        if (!quest) continue;
+        requiredQuests.push(quest);
       }
-      console.log(requiredQuests)
+      console.log(requiredQuests);
       res.status(200).send({
         ...badge,
-        requiredQuests
-      })
-    }else {
+        requiredQuests,
+      });
+    } else {
       res.status(400).send({
-        msg : "NOT FOUND"
-      })
+        msg: "NOT FOUND",
+      });
     }
-  }catch(e){
+  } catch (e) {
     console.log(e);
     res.status(500).send();
   }
-})
+});
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
