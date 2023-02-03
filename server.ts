@@ -667,6 +667,37 @@ app.get("/badge/:badgeId", async (req: Request, res: Response) => {
   }
 });
 
+app.get("/pending-quests/:groupId", async (req: Request, res: Response) => {
+  const {groupId} = req.params;
+  try {
+    const db = await connectToDb();
+    const users = await db.collection("users").find({}).toArray();
+    const quests = (await db.collection("groups").find({id : groupId.toString()}));
+    let pendingQuests: any = [];
+    users.forEach((e: any) => {
+      e.userQuests.forEach((item: any)=>{
+        if(item.groupId && item.status && item.status == "PENDING"){
+          pendingQuests.push({
+            ...item,
+            username : e.username,
+            name: e.name
+          })
+        }
+      })
+    });
+    res.status(200).send({
+      msg : "success",
+      pendingQuests
+    })
+  }catch(e) {
+    console.log(e);
+    res.status(500).send({
+      msg : "error",
+      pendingQuests : []
+    })
+  }
+})
+
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
 });
