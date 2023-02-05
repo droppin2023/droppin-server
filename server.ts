@@ -152,7 +152,7 @@ app.get(
             claimable: true,
           });
         } else {
-          res.status(500).send({
+          res.status(200).send({
             msg: " user hasnt completed quests",
             claimable: false,
           });
@@ -674,13 +674,24 @@ app.get("/pending-quests/:groupId", async (req: Request, res: Response) => {
     const users = await db.collection("users").find({}).toArray();
     const quests = (await db.collection("groups").find({id : groupId.toString()}));
     let pendingQuests: any = [];
+
     users.forEach((e: any) => {
       e.userQuests.forEach((item: any)=>{
-        if(item.groupId && item.status && item.status == "PENDING"){
+        if(item.groupId && item.groupId === groupId && item.status && item.status == "PENDING"){
           pendingQuests.push({
-            ...item,
-            username : e.username,
-            name: e.name
+            quest: {
+              id: item.id,
+              name: item.name,
+              description: item.detail,
+              engageScore: item.engagePoints,
+            },
+            requestUser: {
+              username: e.username,
+              address: e.address,
+              image: e.image,
+              name: e.name,
+            },
+            requestAnswer: item.userSubmission,
           })
         }
       })
