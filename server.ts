@@ -28,6 +28,8 @@ const cors = require("cors");
 const fetch = require("node-fetch");
 const nodeMailer = require("nodemailer");
 const Validator = require("sns-payload-validator");
+const multer = require("multer")
+const fs = require("fs")
 
 dotenv.config();
 const corsOptions = {
@@ -40,9 +42,13 @@ const port = process.env.PORT || 9000;
 
 // parse JSON and others
 
+const upload = multer({dest: "./media"})
+
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
+
+
 
 // log all requests and responses
 morganBody(app, { logAllReqHeader: true, maxBodyLength: 5000 });
@@ -63,6 +69,29 @@ const connectToDb = async () => {
 
   return db;
 };
+
+// serve images from here
+app.use("/media", express.static("media"))
+
+// endpoint to upload images
+app.post("/upload", upload.single("file"), (req: any, res: Response) => {
+
+  const tempPath = req.file.path
+  const targetPath = tempPath + ".png"
+
+  fs.rename(`./${tempPath}`, `./${targetPath}`, (err: any) => {
+    if(err) res.status(500).json({
+      msg: "File upload error"
+    })
+  })
+
+
+  res.status(200).json({url: `${corsOptions.origin}/${targetPath}`})
+
+
+})
+
+
 app.post("/create-group", async (req: Request, res: Response) => {
   const {
     transactionHash,
