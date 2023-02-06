@@ -365,15 +365,18 @@ app.post("/create-quest", async (req: Request, res: Response) => {
 
   try {
     const db = await connectToDb();
-    const { questData, id } = await parseReceipt(
+    const receipt = await parseReceipt(
       transactionHash,
       "QuestCreated",
       contracts.core
     );
+    const { questData, id } = receipt
     const { engagePoints, groupId } = questData;
+
+    const group = await db.collection("groups").findOne({id: groupId.toString()})
     const quest = await db.collection("quests").findOne({ id: id.toString() });
     if (quest) {
-      res.status(500).send({
+      res.status(400).send({
         msg: "FAIL : duplicated quest",
       });
     } else {
@@ -384,6 +387,7 @@ app.post("/create-quest", async (req: Request, res: Response) => {
         groupId: groupId.toString(),
         name,
         detail,
+        symbol: group.repUnit
       });
       await updateGroupQuests(db, groupId.toString(), id.toString());
       res.status(200).send({
@@ -406,7 +410,7 @@ app.post("/create-badge", async (req: Request, res: Response) => {
       "BadgeCreated",
       contracts.badge
     );
-    const { requiredQuests, engagePointsThreshold, badgePrice, NFT, groupId } =
+    const { requiredQuests, engagePointsThreshold, badgePrice, NFT, groupId, symbol } =
       badgeData;
 
     const badge = await db.collection("badges").findOne({ id: id.toString() });
@@ -425,6 +429,7 @@ app.post("/create-badge", async (req: Request, res: Response) => {
         name,
         image: nftInitBaseURI,
         groupId: groupId.toString(),
+        symbol
       });
       await updateGroupBadges(db, groupId.toString(), id.toString());
       res.status(200).send({
@@ -544,6 +549,9 @@ app.get(
       const user = await db.collection("users").findOne({
         username: { $regex: new RegExp("^" + username.toLowerCase(), "i") },
       });
+      const group = await db.collection("groups").findOne({
+        id: communityId,
+      });
       let pendingQuests = user.userQuests;
       pendingQuests = pendingQuests.filter((item: any) => {
         return item.groupId == communityId.toString();
@@ -556,6 +564,7 @@ app.get(
             name: e.name,
             description: e.detail,
             engageScore: e.engagePoints,
+            symbol: group.repUnit
           },
           requestUser: {
             username: user.username,
@@ -598,12 +607,14 @@ app.get(
             address: group.link,
             image: group.logo,
             name: group.name,
+            symbol: group.repUnit
           },
           quest: {
             id: questId,
             name: quest.name,
             engageScore: quest.engagePoints,
             description: quest.detail,
+            symbol: group.repUnit
           },
           userSubmission: quest.userSubmission,
         });
@@ -624,9 +635,11 @@ app.get("/quest/:questId", async (req: Request, res: Response) => {
   try {
     const db = await connectToDb();
     const quest = await db.collection("quests").findOne({ id: questId });
+    const group = await db.collection("groups").findOne({id: quest.groupId})
     if (quest) {
       res.status(200).send({
-        quest,
+        ...quest,
+        symbol: group.repUnit
       });
     } else {
       res.status(400).send({
@@ -644,17 +657,19 @@ app.get("/badge/:badgeId", async (req: Request, res: Response) => {
   try {
     const db = await connectToDb();
     const badge = await db.collection("badges").findOne({ id: badgeId });
+    const community = await db.collection("groups").findOne({ id: badge.groupId });
     if (badge) {
       let requiredQuests: any = [];
       for (const questId of badge.requiredQuests) {
         const quest = await db.collection("quests").findOne({ id: questId });
         if (!quest) continue;
-        requiredQuests.push(quest);
+        requiredQuests.push({...quest, symbol: community.repUnit});
       }
       console.log(requiredQuests);
       res.status(200).send({
         ...badge,
         requiredQuests,
+        symbol: community.repUnit
       });
     } else {
       res.status(400).send({
@@ -672,7 +687,7 @@ app.get("/pending-quests/:groupId", async (req: Request, res: Response) => {
   try {
     const db = await connectToDb();
     const users = await db.collection("users").find({}).toArray();
-    const quests = (await db.collection("groups").find({id : groupId.toString()}));
+    const group = (await db.collection("groups").findOne({id : groupId.toString()}));
     let pendingQuests: any = [];
 
     users.forEach((e: any) => {
@@ -684,6 +699,7 @@ app.get("/pending-quests/:groupId", async (req: Request, res: Response) => {
               name: item.name,
               description: item.detail,
               engageScore: item.engagePoints,
+              symbol: group.repUnit
             },
             requestUser: {
               username: e.username,
