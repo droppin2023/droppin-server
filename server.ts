@@ -194,7 +194,7 @@ app.get(
   }
 );
 
-app.post("edit-group", async (req: Request, res: Response) => {
+app.post("/edit-group", async (req: Request, res: Response) => {
   const { id, link, logo, name, description, category, discord, address } =
     req.body;
 
@@ -211,6 +211,7 @@ app.post("edit-group", async (req: Request, res: Response) => {
           { $set: { link, name, logo, description, category, discord } },
           { new: true }
         );
+        res.status(200).end()
     } else {
       res.status(400).end();
     }
