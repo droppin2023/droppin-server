@@ -1,5 +1,6 @@
 import express, { Express, Request, response, Response } from "express";
 import dotenv from "dotenv";
+import axios from "axios";
 import morganBody from "morgan-body";
 import bodyParser from "body-parser";
 import {
@@ -19,6 +20,7 @@ import {
   updateGroupQuests,
   updateGroupBadges,
   updateGroupMembers,
+  API_URL
 } from "./utils/utils";
 import { ethers, providers, Wallet } from "ethers";
 import { connect } from "http2";
@@ -73,6 +75,8 @@ app.post("/create-group", async (req: Request, res: Response) => {
     category,
     discord,
     repUnit,
+    issuerId,
+    token
   } = req.body;
 
   try {
@@ -98,6 +102,8 @@ app.post("/create-group", async (req: Request, res: Response) => {
         totalMember: 0,
         repUnit,
         members: [],
+        issuerId,
+        token
       });
       res.status(200).send({
         id: id.toString(),
@@ -397,7 +403,7 @@ app.post("/create-quest", async (req: Request, res: Response) => {
 });
 
 app.post("/create-badge", async (req: Request, res: Response) => {
-  const { transactionHash, description, name } = req.body;
+  const { transactionHash, description, name, schemaHash } = req.body;
 
   try {
     const db = await connectToDb();
@@ -425,6 +431,7 @@ app.post("/create-badge", async (req: Request, res: Response) => {
         name,
         image: nftInitBaseURI,
         groupId: groupId.toString(),
+        schemaHash
       });
       await updateGroupBadges(db, groupId.toString(), id.toString());
       res.status(200).send({

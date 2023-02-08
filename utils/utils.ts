@@ -14,6 +14,8 @@ async function awaitAndFilter(requests: any[]) {
   return result;
 }
 
+const API_URL = process.env.POLYGON_API_URL;
+
 const contracts = {
   core: new Contract(DIAMOND_ADDRESS, CORE_FACET_ABI),
   badge: new Contract(DIAMOND_ADDRESS, BADGE_FACET_ABI),
@@ -245,4 +247,5 @@ export {
   updateGroupQuests,
   updateGroupBadges,
   updateGroupMembers,
+  API_URL
 };
