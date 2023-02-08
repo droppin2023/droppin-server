@@ -190,7 +190,7 @@ const updateGroupQuests = async (db: any, groupId: any, questId: any) => {
     .findOneAndUpdate({ id: groupId }, { $set: { quests } }, { new: true });
 };
 
-const updateGroupMembers = async ( db: any, groupId: any, userAddr: any ) {
+const updateGroupMembers = async ( db: any, groupId: any, userAddr: any ) => {
   const group = await db.collection("groups").findOne({ id: groupId });
   const user = await db
     .collection("users")
