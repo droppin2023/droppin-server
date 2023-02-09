@@ -1,22 +1,14 @@
 export const CORE_FACET_ABI = [
   {
-    "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
         "internalType": "address",
-        "name": "creator",
+        "name": "_validatorAddr",
         "type": "address"
       }
     ],
-    "name": "GroupCreated",
-    "type": "event"
+    "stateMutability": "nonpayable",
+    "type": "constructor"
   },
   {
     "anonymous": false,
@@ -24,139 +16,29 @@ export const CORE_FACET_ABI = [
       {
         "components": [
           {
-            "internalType": "bytes32",
+            "internalType": "uint256[3]",
+            "name": "requiredQuests",
+            "type": "uint256[3]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "engagePointsThreshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "badgePrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
             "name": "name",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint256",
-            "name": "groupId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "engagePoints",
-            "type": "uint256"
-          }
-        ],
-        "indexed": false,
-        "internalType": "struct LibCoreFacet.QuestData",
-        "name": "questData",
-        "type": "tuple"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      }
-    ],
-    "name": "QuestCreated",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "bytes32",
-            "name": "name",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint256",
-            "name": "groupId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "engagePoints",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct LibCoreFacet.QuestData",
-        "name": "_questData",
-        "type": "tuple"
-      }
-    ],
-    "name": "addQuest",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_questId",
-        "type": "uint256"
-      }
-    ],
-    "name": "completeQuest",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "name",
-        "type": "bytes32"
-      }
-    ],
-    "name": "createGroup",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_groupId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getGroup",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "bytes32",
-            "name": "name",
-            "type": "bytes32"
+            "type": "string"
           },
           {
             "internalType": "address",
-            "name": "owner",
+            "name": "NFT",
             "type": "address"
-          }
-        ],
-        "internalType": "struct LibCoreFacet.GroupData",
-        "name": "",
-        "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_questId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getQuest",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "bytes32",
-            "name": "name",
-            "type": "bytes32"
           },
           {
             "internalType": "uint256",
@@ -165,27 +47,187 @@ export const CORE_FACET_ABI = [
           },
           {
             "internalType": "uint256",
-            "name": "engagePoints",
+            "name": "schemaHash",
             "type": "uint256"
           }
         ],
-        "internalType": "struct LibCoreFacet.QuestData",
-        "name": "",
+        "indexed": false,
+        "internalType": "struct LibBadgeFacet.BadgeData",
+        "name": "badgeData",
         "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "userAddr",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
       }
     ],
-    "stateMutability": "view",
+    "name": "BadgeClaimed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256[3]",
+            "name": "requiredQuests",
+            "type": "uint256[3]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "engagePointsThreshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "badgePrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "NFT",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "groupId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "schemaHash",
+            "type": "uint256"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct LibBadgeFacet.BadgeData",
+        "name": "badgeData",
+        "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "nftSymbol",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "nftInitBaseURI",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "BadgeCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256[3]",
+            "name": "requiredQuests",
+            "type": "uint256[3]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "engagePointsThreshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "badgePrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "NFT",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "groupId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "schemaHash",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct LibBadgeFacet.BadgeData",
+        "name": "_badgeData",
+        "type": "tuple"
+      },
+      {
+        "internalType": "string",
+        "name": "_nftSymbol",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_nftInitBaseURI",
+        "type": "string"
+      }
+    ],
+    "name": "addBadge",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_groupId",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
-    "name": "getUserEngagePoint",
+    "name": "addressToId",
     "outputs": [
       {
         "internalType": "uint256",
@@ -200,21 +242,332 @@ export const CORE_FACET_ABI = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_groupId",
+        "name": "_badgeId",
         "type": "uint256"
-      },
+      }
+    ],
+    "name": "getBadge",
+    "outputs": [
       {
-        "internalType": "bytes32",
-        "name": "_newName",
-        "type": "bytes32"
-      },
+        "components": [
+          {
+            "internalType": "uint256[3]",
+            "name": "requiredQuests",
+            "type": "uint256[3]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "engagePointsThreshold",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "badgePrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "address",
+            "name": "NFT",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "groupId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "schemaHash",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct LibBadgeFacet.BadgeData",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getSupportedRequests",
+    "outputs": [
+      {
+        "internalType": "uint64[]",
+        "name": "arr",
+        "type": "uint64[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "requestId",
+        "type": "uint64"
+      }
+    ],
+    "name": "getZKPRequest",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "schema",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "slotIndex",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "operator",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "value",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "string",
+            "name": "circuitId",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct ICircuitValidator.CircuitQuery",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "idToAddress",
+    "outputs": [
       {
         "internalType": "address",
-        "name": "_newOwner",
+        "name": "",
         "type": "address"
       }
     ],
-    "name": "modifyGroup",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_groupId",
+        "type": "uint256"
+      }
+    ],
+    "name": "isMemberOfGroup",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "name": "proofs",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "name": "requestQueries",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "schema",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "slotIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "operator",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "circuitId",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "name": "requestValidators",
+    "outputs": [
+      {
+        "internalType": "contract ICircuitValidator",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_validator",
+        "type": "address"
+      }
+    ],
+    "name": "setValidator",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint64",
+        "name": "requestId",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "inputs",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "uint256[2]",
+        "name": "a",
+        "type": "uint256[2]"
+      },
+      {
+        "internalType": "uint256[2][2]",
+        "name": "b",
+        "type": "uint256[2][2]"
+      },
+      {
+        "internalType": "uint256[2]",
+        "name": "c",
+        "type": "uint256[2]"
+      }
+    ],
+    "name": "submitZKPResponse",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "supportedRequests",
+    "outputs": [
+      {
+        "internalType": "uint64",
+        "name": "",
+        "type": "uint64"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -222,15 +575,67 @@ export const CORE_FACET_ABI = [
 ]
   export const BADGE_FACET_ABI = [
     {
+      "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
           "internalType": "address",
-          "name": "_validatorAddr",
+          "name": "creator",
           "type": "address"
         }
       ],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
+      "name": "GroupCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "GroupModified",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "userAddr",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "engageScore",
+          "type": "uint256"
+        }
+      ],
+      "name": "QuestComplete",
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -238,29 +643,9 @@ export const CORE_FACET_ABI = [
         {
           "components": [
             {
-              "internalType": "uint256[3]",
-              "name": "requiredQuests",
-              "type": "uint256[3]"
-            },
-            {
-              "internalType": "uint256",
-              "name": "engagePointsThreshold",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "badgePrice",
-              "type": "uint256"
-            },
-            {
-              "internalType": "string",
+              "internalType": "bytes32",
               "name": "name",
-              "type": "string"
-            },
-            {
-              "internalType": "address",
-              "name": "NFT",
-              "type": "address"
+              "type": "bytes32"
             },
             {
               "internalType": "uint256",
@@ -269,26 +654,14 @@ export const CORE_FACET_ABI = [
             },
             {
               "internalType": "uint256",
-              "name": "schemaHash",
+              "name": "engagePoints",
               "type": "uint256"
             }
           ],
           "indexed": false,
-          "internalType": "struct LibBadgeFacet.BadgeData",
-          "name": "badgeData",
+          "internalType": "struct LibCoreFacet.QuestData",
+          "name": "questData",
           "type": "tuple"
-        },
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "nftSymbol",
-          "type": "string"
-        },
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "nftInitBaseURI",
-          "type": "string"
         },
         {
           "indexed": false,
@@ -297,26 +670,7 @@ export const CORE_FACET_ABI = [
           "type": "uint256"
         }
       ],
-      "name": "BadgeCreated",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "previousOwner",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
-        }
-      ],
-      "name": "OwnershipTransferred",
+      "name": "QuestCreated",
       "type": "event"
     },
     {
@@ -324,29 +678,9 @@ export const CORE_FACET_ABI = [
         {
           "components": [
             {
-              "internalType": "uint256[3]",
-              "name": "requiredQuests",
-              "type": "uint256[3]"
-            },
-            {
-              "internalType": "uint256",
-              "name": "engagePointsThreshold",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "badgePrice",
-              "type": "uint256"
-            },
-            {
-              "internalType": "string",
+              "internalType": "bytes32",
               "name": "name",
-              "type": "string"
-            },
-            {
-              "internalType": "address",
-              "name": "NFT",
-              "type": "address"
+              "type": "bytes32"
             },
             {
               "internalType": "uint256",
@@ -355,26 +689,16 @@ export const CORE_FACET_ABI = [
             },
             {
               "internalType": "uint256",
-              "name": "schemaHash",
+              "name": "engagePoints",
               "type": "uint256"
             }
           ],
-          "internalType": "struct LibBadgeFacet.BadgeData",
-          "name": "_badgeData",
+          "internalType": "struct LibCoreFacet.QuestData",
+          "name": "_questData",
           "type": "tuple"
-        },
-        {
-          "internalType": "string",
-          "name": "_nftSymbol",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_nftInitBaseURI",
-          "type": "string"
         }
       ],
-      "name": "addBadge",
+      "name": "addQuest",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -382,17 +706,60 @@ export const CORE_FACET_ABI = [
     {
       "inputs": [
         {
+          "internalType": "uint256",
+          "name": "_questId",
+          "type": "uint256"
+        },
+        {
           "internalType": "address",
-          "name": "",
+          "name": "userAddr",
           "type": "address"
         }
       ],
-      "name": "addressToId",
-      "outputs": [
+      "name": "completeQuest",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "name",
+          "type": "bytes32"
+        }
+      ],
+      "name": "createGroup",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
         {
           "internalType": "uint256",
-          "name": "",
+          "name": "_groupId",
           "type": "uint256"
+        }
+      ],
+      "name": "getGroup",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "name",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct LibCoreFacet.GroupData",
+          "name": "",
+          "type": "tuple"
         }
       ],
       "stateMutability": "view",
@@ -402,38 +769,18 @@ export const CORE_FACET_ABI = [
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "_badgeId",
+          "name": "_questId",
           "type": "uint256"
         }
       ],
-      "name": "getBadge",
+      "name": "getQuest",
       "outputs": [
         {
           "components": [
             {
-              "internalType": "uint256[3]",
-              "name": "requiredQuests",
-              "type": "uint256[3]"
-            },
-            {
-              "internalType": "uint256",
-              "name": "engagePointsThreshold",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "badgePrice",
-              "type": "uint256"
-            },
-            {
-              "internalType": "string",
+              "internalType": "bytes32",
               "name": "name",
-              "type": "string"
-            },
-            {
-              "internalType": "address",
-              "name": "NFT",
-              "type": "address"
+              "type": "bytes32"
             },
             {
               "internalType": "uint256",
@@ -442,91 +789,13 @@ export const CORE_FACET_ABI = [
             },
             {
               "internalType": "uint256",
-              "name": "schemaHash",
+              "name": "engagePoints",
               "type": "uint256"
             }
           ],
-          "internalType": "struct LibBadgeFacet.BadgeData",
+          "internalType": "struct LibCoreFacet.QuestData",
           "name": "",
           "type": "tuple"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getSupportedRequests",
-      "outputs": [
-        {
-          "internalType": "uint64[]",
-          "name": "arr",
-          "type": "uint64[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint64",
-          "name": "requestId",
-          "type": "uint64"
-        }
-      ],
-      "name": "getZKPRequest",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint256",
-              "name": "schema",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "slotIndex",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "operator",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256[]",
-              "name": "value",
-              "type": "uint256[]"
-            },
-            {
-              "internalType": "string",
-              "name": "circuitId",
-              "type": "string"
-            }
-          ],
-          "internalType": "struct ICircuitValidator.CircuitQuery",
-          "name": "",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "idToAddress",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -540,194 +809,36 @@ export const CORE_FACET_ABI = [
           "type": "uint256"
         }
       ],
-      "name": "isMemberOfGroup",
+      "name": "getUserEngagePoint",
       "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        },
-        {
-          "internalType": "uint64",
-          "name": "",
-          "type": "uint64"
-        }
-      ],
-      "name": "proofs",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "renounceOwnership",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint64",
-          "name": "",
-          "type": "uint64"
-        }
-      ],
-      "name": "requestQueries",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "schema",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "slotIndex",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "operator",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "circuitId",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint64",
-          "name": "",
-          "type": "uint64"
-        }
-      ],
-      "name": "requestValidators",
-      "outputs": [
-        {
-          "internalType": "contract ICircuitValidator",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_validator",
-          "type": "address"
-        }
-      ],
-      "name": "setValidator",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint64",
-          "name": "requestId",
-          "type": "uint64"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "inputs",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "uint256[2]",
-          "name": "a",
-          "type": "uint256[2]"
-        },
-        {
-          "internalType": "uint256[2][2]",
-          "name": "b",
-          "type": "uint256[2][2]"
-        },
-        {
-          "internalType": "uint256[2]",
-          "name": "c",
-          "type": "uint256[2]"
-        }
-      ],
-      "name": "submitZKPResponse",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "payable",
-      "type": "function"
-    },
-    {
-      "inputs": [
         {
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
         }
       ],
-      "name": "supportedRequests",
-      "outputs": [
-        {
-          "internalType": "uint64",
-          "name": "",
-          "type": "uint64"
-        }
-      ],
       "stateMutability": "view",
       "type": "function"
     },
     {
       "inputs": [
         {
+          "internalType": "uint256",
+          "name": "_groupId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_newName",
+          "type": "bytes32"
+        },
+        {
           "internalType": "address",
-          "name": "newOwner",
+          "name": "_newOwner",
           "type": "address"
         }
       ],
-      "name": "transferOwnership",
+      "name": "modifyGroup",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
