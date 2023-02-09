@@ -1,21 +1,5 @@
 export const CORE_FACET_ABI = [
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_user",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_contractOwner",
-        "type": "address"
-      }
-    ],
-    "name": "NotContractOwner",
-    "type": "error"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -32,50 +16,6 @@ export const CORE_FACET_ABI = [
       }
     ],
     "name": "GroupCreated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "GroupModified",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "groupId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "userAddr",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "engageScore",
-        "type": "uint256"
-      }
-    ],
-    "name": "QuestComplete",
     "type": "event"
   },
   {
@@ -150,11 +90,6 @@ export const CORE_FACET_ABI = [
         "internalType": "uint256",
         "name": "_questId",
         "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "userAddr",
-        "type": "address"
       }
     ],
     "name": "completeQuest",
@@ -287,61 +222,15 @@ export const CORE_FACET_ABI = [
 ]
   export const BADGE_FACET_ABI = [
     {
-      "anonymous": false,
       "inputs": [
         {
-          "components": [
-            {
-              "internalType": "uint256[3]",
-              "name": "requiredQuests",
-              "type": "uint256[3]"
-            },
-            {
-              "internalType": "uint256",
-              "name": "engagePointsThreshold",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "badgePrice",
-              "type": "uint256"
-            },
-            {
-              "internalType": "string",
-              "name": "name",
-              "type": "string"
-            },
-            {
-              "internalType": "address",
-              "name": "NFT",
-              "type": "address"
-            },
-            {
-              "internalType": "uint256",
-              "name": "groupId",
-              "type": "uint256"
-            }
-          ],
-          "indexed": false,
-          "internalType": "struct LibBadgeFacet.BadgeData",
-          "name": "badgeData",
-          "type": "tuple"
-        },
-        {
-          "indexed": false,
           "internalType": "address",
-          "name": "userAddr",
+          "name": "_validatorAddr",
           "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "id",
-          "type": "uint256"
         }
       ],
-      "name": "BadgeClaimed",
-      "type": "event"
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     },
     {
       "anonymous": false,
@@ -376,6 +265,11 @@ export const CORE_FACET_ABI = [
             {
               "internalType": "uint256",
               "name": "groupId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "schemaHash",
               "type": "uint256"
             }
           ],
@@ -407,6 +301,25 @@ export const CORE_FACET_ABI = [
       "type": "event"
     },
     {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
       "inputs": [
         {
           "components": [
@@ -439,6 +352,11 @@ export const CORE_FACET_ABI = [
               "internalType": "uint256",
               "name": "groupId",
               "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "schemaHash",
+              "type": "uint256"
             }
           ],
           "internalType": "struct LibBadgeFacet.BadgeData",
@@ -464,14 +382,20 @@ export const CORE_FACET_ABI = [
     {
       "inputs": [
         {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "addressToId",
+      "outputs": [
+        {
           "internalType": "uint256",
-          "name": "_badgeId",
+          "name": "",
           "type": "uint256"
         }
       ],
-      "name": "claimBadge",
-      "outputs": [],
-      "stateMutability": "payable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -515,11 +439,94 @@ export const CORE_FACET_ABI = [
               "internalType": "uint256",
               "name": "groupId",
               "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "schemaHash",
+              "type": "uint256"
             }
           ],
           "internalType": "struct LibBadgeFacet.BadgeData",
           "name": "",
           "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getSupportedRequests",
+      "outputs": [
+        {
+          "internalType": "uint64[]",
+          "name": "arr",
+          "type": "uint64[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "requestId",
+          "type": "uint64"
+        }
+      ],
+      "name": "getZKPRequest",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "schema",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "slotIndex",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "operator",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "value",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "string",
+              "name": "circuitId",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct ICircuitValidator.CircuitQuery",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "idToAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -542,6 +549,187 @@ export const CORE_FACET_ABI = [
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "name": "proofs",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "name": "requestQueries",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "schema",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "slotIndex",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "operator",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "circuitId",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "name": "requestValidators",
+      "outputs": [
+        {
+          "internalType": "contract ICircuitValidator",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_validator",
+          "type": "address"
+        }
+      ],
+      "name": "setValidator",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "requestId",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "inputs",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[2]",
+          "name": "a",
+          "type": "uint256[2]"
+        },
+        {
+          "internalType": "uint256[2][2]",
+          "name": "b",
+          "type": "uint256[2][2]"
+        },
+        {
+          "internalType": "uint256[2]",
+          "name": "c",
+          "type": "uint256[2]"
+        }
+      ],
+      "name": "submitZKPResponse",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "supportedRequests",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     }
   ]
