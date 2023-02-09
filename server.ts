@@ -441,7 +441,7 @@ app.post("/create-quest", async (req: Request, res: Response) => {
 });
 
 app.post("/create-badge", async (req: Request, res: Response) => {
-  const { transactionHash, description, name, schemaHash, offerId } = req.body;
+  const { transactionHash, description, name, schemaHash, offerId, schemaId, schemaType } = req.body;
 
   try {
     const db = await connectToDb();
@@ -471,7 +471,9 @@ app.post("/create-badge", async (req: Request, res: Response) => {
         groupId: groupId.toString(),
         symbol,
         schemaHash,
-        offerId
+        offerId,
+        schemaId,
+        schemaType
       });
       await updateGroupBadges(db, groupId.toString(), id.toString());
       res.status(200).send({
