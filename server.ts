@@ -182,7 +182,7 @@ app.get(
             return e == '0' || item == e;
           });
           console.log(itemToFind)
-          if (!itemToFind) done = false;
+          if (!itemToFind && fulfilledQuests.length > 0) done = false;
         });
 
         if (done) {
