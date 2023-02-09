@@ -441,7 +441,7 @@ app.post("/create-quest", async (req: Request, res: Response) => {
 });
 
 app.post("/create-badge", async (req: Request, res: Response) => {
-  const { transactionHash, description, name, schemaHash, offerId } = req.body;
+  const { transactionHash, description, name, schemaHash } = req.body;
 
   try {
     const db = await connectToDb();
