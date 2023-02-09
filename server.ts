@@ -470,8 +470,7 @@ app.post("/create-badge", async (req: Request, res: Response) => {
         image: nftInitBaseURI,
         groupId: groupId.toString(),
         symbol,
-        schemaHash,
-        offerId
+        schemaHash
       });
       await updateGroupBadges(db, groupId.toString(), id.toString());
       res.status(200).send({
