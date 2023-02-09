@@ -105,7 +105,9 @@ app.post("/create-group", async (req: Request, res: Response) => {
     discord,
     repUnit,
     issuerId,
-    token
+    token,
+    email,
+    password
   } = req.body;
 
   try {
@@ -132,7 +134,9 @@ app.post("/create-group", async (req: Request, res: Response) => {
         repUnit,
         members: [],
         issuerId,
-        token
+        token,
+        email,
+        password
       });
       res.status(200).send({
         id: id.toString(),
