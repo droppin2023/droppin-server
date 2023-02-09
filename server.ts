@@ -761,6 +761,21 @@ app.get("/pending-quests/:groupId", async (req: Request, res: Response) => {
     })
   }
 })
+app.post("/update-token", async (req: Request, res: Response) => {
+  const { issuerId, token } = req.body;
+
+  try {
+    const db = await connectToDb();
+    await db
+    .collection("groups")
+    .findOneAndUpdate({
+      issuerId: { $regex: new RegExp("^" + issuerId.toLowerCase(), "i") },
+    }, { $set: { token } }, { new: true });
+  } catch (e) {
+    console.log(e);
+    res.status(500).send();
+  }
+});
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
