@@ -88,7 +88,7 @@ app.post("/upload", upload.single("file"), (req: any, res: Response) => {
   })
 
 
-  res.status(200).json({url: `${corsOptions.origin}/${targetPath}`})
+  res.status(200).json({url: `https://stingray-app-elafw.ondigitalocean.app/${targetPath}`})
 
 
 })
