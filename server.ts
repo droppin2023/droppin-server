@@ -93,6 +93,10 @@ app.post("/upload", upload.single("file"), (req: any, res: Response) => {
 
 })
 
+app.post("/test", async (req: Request, res: Response) => {
+  res.status(200).send();
+})
+
 
 app.post("/create-group", async (req: Request, res: Response) => {
   const {
